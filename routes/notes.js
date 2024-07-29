@@ -1,34 +1,41 @@
 const notes = require("express").Router();
 const fs = require("fs");
 
-// get call - Read from db.json file and send the response if no error
+// GET api call - Read from db.json file and send the response if no error
 notes.get("/", (req, res) => {
+
     fs.readFile("./db/db.json", 'utf8', (error, data) => {
         if (error) {
-            res.json("Error while reading file: ", error);
+            const response = {
+                status: 'Failed',
+                code: 500,
+                body: error,
+            };
+            res.status(500).json(response);
         } else {
             if (data) {
-                res.json(JSON.parse(data));
+                res.status(200).json(JSON.parse(data));
             } else {
-                res.json([]);
+                res.status(200).json([]);
             }
         }
     });
 });
 
+// POST api call implementation
 notes.post("/", (req, res) => {
     const { id, title, text } = req.body;
     if (id && title && text) {
-        const op = fs.readFile("./db/db.json", 'utf8', (error, data) => {
+
+        fs.readFile("./db/db.json", 'utf8', (error, data) => {
             if (error) {
-                //TODO: How to handle this in the front end
-                throw new Error("Failed to read file: ", error);
-                // response = {
-                //     status: 'Failed',
-                //     code: 500,
-                //     body: error,
-                // };
-                // res.json(response);
+                console.log("Error while reading the file: ", error);
+                const response = {
+                    status: 'Failed',
+                    code: 500,
+                    body: error,
+                };
+                return res.status(500).json(response);
             }
 
 
@@ -44,38 +51,53 @@ notes.post("/", (req, res) => {
             }
             op.push(newData);
             fs.writeFile("./db/db.json", JSON.stringify(op), (err) => {
-                let response;
                 if (err) {
-                    response = {
+                    console.log("Error while writing the file: ", err);
+                    const response = {
                         status: 'Failed',
                         code: 500,
                         body: err,
                     };
+                    res.status(500).json(response);
                 } else {
-                    response = {
+                    const response = {
                         status: 'Success',
                         code: 200,
                         body: newData,
                     };
+                    res.status(200).json(response);
                 }
-                res.json(response);
             });
 
         });
     } else {
-        res.json("Error while updating the data");
+        const err = "Error while processing the post request: ";
+        console.log(err);
+        const response = {
+            status: 'Failed',
+            code: 500,
+            body: err,
+        };
+        res.status(500).json(response);
     }
 });
 
+// DELETE api implementation.
 notes.delete("/:post_id", (req, res) => {
     console.log(req.params);
     const { post_id } = req.params;
-
     if (post_id) {
         const op = fs.readFile("./db/db.json", 'utf8', (error, data) => {
             if (error) {
-                //TODO: How to handle this in the front end
-                throw new Error("Failed to read file: ", error);
+                if (error) {
+                    console.log("Error while reading the file: ", error);
+                    const response = {
+                        status: 'Failed',
+                        code: 500,
+                        body: error,
+                    };
+                    return res.status(500).json(response);
+                }
             }
 
             let op = [];
@@ -93,27 +115,35 @@ notes.delete("/:post_id", (req, res) => {
 
             console.log("Entries post delete: ", op);
             fs.writeFile("./db/db.json", JSON.stringify(op), (err) => {
-                let response;
+
                 if (err) {
-                    response = {
+                    console.log("Error while writing the file: ", err)
+                    const response = {
                         status: 'Failed',
                         code: 500,
                         body: err,
                     };
+                    res.status(500).json(response);
                 } else {
-                    response = {
+                    const response = {
                         status: 'Success',
                         code: 200,
                         body: "Entry deleted!",
                     };
+                    res.status(200).json(response);
                 }
-                res.json(response);
             });
-
 
         });
     } else {
-        res.json("Error while delete the post");
+        const err = "Error while processing the delete request: ";
+        console.log(err);
+        const response = {
+            status: 'Failed',
+            code: 500,
+            body: err,
+        };
+        res.status(500).json(response);
     }
 
 });
