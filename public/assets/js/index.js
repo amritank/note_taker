@@ -5,6 +5,7 @@ let saveNoteBtn;
 let newNoteBtn;
 let noteList;
 
+
 if (window.location.pathname === '/notes') {
   noteForm = document.querySelector('.note-form');
   noteTitle = document.querySelector('.note-title');
@@ -14,6 +15,12 @@ if (window.location.pathname === '/notes') {
   clearBtn = document.querySelector('.clear-btn');
   noteList = document.querySelectorAll('.list-container .list-group');
 }
+
+// 
+
+if (window.location.pathname === '/index') {
+}
+
 
 // Show an element
 const show = (elem) => {
@@ -74,6 +81,7 @@ const renderActiveNote = () => {
 
 const handleNoteSave = () => {
   const newNote = {
+    id: Math.floor(Math.random() * Date.now()),
     title: noteTitle.value,
     text: noteText.value
   };
